@@ -30,4 +30,15 @@ class PointServiceTest {
         assertThat(userPoint.id()).isEqualTo(1L);
         assertThat(userPoint.point()).isEqualTo(1000);
     }
+
+    @Test
+    void 존재하지_않는_유저는_포인트_0_을_반환한다() throws Exception {
+        //given & when
+        UserPoint userPoint = pointService.findUserPoint(1000L);
+
+        //then
+        assertThat(userPoint.id()).isEqualTo(1000L);
+        assertThat(userPoint.point()).isEqualTo(0);
+    }
+
 }

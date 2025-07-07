@@ -10,6 +10,8 @@ public record UserPoint(
 
     private final static Long CHARGE_MIN = 1000L;
     private final static Long CHARGE_MAX = 10000L;
+    private final static Long USE_MIN = 1000L;
+    private final static Long BALANCE_MIN_FOR_USE = 10000L;
     private final static Long POINT_BALANCE_MAX = 100000L;
 
     public static UserPoint empty(long id) {
@@ -29,6 +31,23 @@ public record UserPoint(
 
     public UserPoint charge(long amount, TimeHolder timeHolder) {
         long updatePoint = this.point + amount;
+        return new UserPoint(this.id, updatePoint, timeHolder.currentTimeMillis());
+    }
+
+    public boolean enableUseAmount(Long amount) {
+        boolean result = true;
+        if (this.point < BALANCE_MIN_FOR_USE) {
+            result = false;
+        } else if (amount < USE_MIN) {
+            result = false;
+        } else if (this.point - amount < 0) {
+            result = false;
+        }
+        return result;
+    }
+
+    public UserPoint use(long amount, TimeHolder timeHolder) {
+        long updatePoint = this.point - amount;
         return new UserPoint(this.id, updatePoint, timeHolder.currentTimeMillis());
     }
 }

@@ -40,11 +40,23 @@ public class PointService {
         UserPoint chargeUserPoint = userPoint.charge(amount, timeHolder);
         userPointTable.insertOrUpdate(chargeUserPoint.id(), chargeUserPoint.point());
 
-        saveLog(chargeUserPoint.id(), chargeUserPoint.point(), TransactionType.CHARGE);
+        saveLog(chargeUserPoint, TransactionType.CHARGE);
         return chargeUserPoint;
     }
 
-    private void saveLog(Long id, Long amount, TransactionType type) {
-        pointHistoryTable.insert(id, amount, type, timeHolder.currentTimeMillis());
+    public UserPoint use(Long id, Long amount) {
+        UserPoint userPoint = userPointTable.selectById(id);
+        if (!userPoint.enableUseAmount(amount)) {
+            throw new CommonException(ErrorCode.POLICY_VIOLATION, "포인트 사용 금액");
+        }
+        UserPoint usedUserPoint = userPoint.use(amount, timeHolder);
+        userPointTable.insertOrUpdate(usedUserPoint.id(), usedUserPoint.point());
+
+        saveLog(usedUserPoint, TransactionType.USE);
+        return usedUserPoint;
+    }
+
+    private void saveLog(UserPoint userPoint, TransactionType type) {
+        pointHistoryTable.insert(userPoint.id(), userPoint.point(), type, userPoint.updateMillis());
     }
 }

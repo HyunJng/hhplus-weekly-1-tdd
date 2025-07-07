@@ -153,4 +153,14 @@ class PointServiceTest {
         assertThat(pointHistories.get(0).updateMillis()).isEqualTo(1234L);
     }
 
+    @Test
+    void 유저는_본인_잔고의_포인트를_사용할_수_있다() throws Exception {
+        //given & when
+        UserPoint usedPoint = pointService.use(2L, 10000L);
+
+        //then
+        assertThat(usedPoint.id()).isEqualTo(2L);
+        assertThat(usedPoint.point()).isEqualTo(70000L);
+        assertThat(usedPoint.updateMillis()).isEqualTo(1234);
+    }
 }

@@ -2,12 +2,12 @@ package io.hhplus.tdd.point.service;
 
 import io.hhplus.tdd.common.exception.domain.CommonException;
 import io.hhplus.tdd.common.exception.domain.ErrorCode;
-import io.hhplus.tdd.common.time.TimeHolder;
-import io.hhplus.tdd.point.domain.PointHistory;
-import io.hhplus.tdd.point.domain.TransactionType;
-import io.hhplus.tdd.point.infrastruction.PointHistoryTable;
-import io.hhplus.tdd.point.infrastruction.UserPointTable;
-import io.hhplus.tdd.point.domain.UserPoint;
+import io.hhplus.tdd.point.domain.policy.ChargingPolicy;
+import io.hhplus.tdd.point.domain.model.Point;
+import io.hhplus.tdd.point.domain.model.PointLog;
+import io.hhplus.tdd.point.domain.model.TransactionType;
+import io.hhplus.tdd.point.domain.policy.UsagePolicy;
+import io.hhplus.tdd.point.service.port.PointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,45 +18,42 @@ import java.util.List;
 @Service
 public class PointService {
 
-    private final UserPointTable userPointTable;
-    private final PointHistoryTable pointHistoryTable;
-    private final TimeHolder timeHolder;
+    private final PointRepository pointRepository;
+    private final ChargingPolicy chargingPolicy;
+    private final UsagePolicy usagePolicy;
 
-    public UserPoint findUserPoint(Long id) {
-        return userPointTable.selectById(id);
+    public Point findPoint(Long id) {
+        return pointRepository.findByUserId(id)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
     }
 
-    public List<PointHistory> findUserPointLog(Long id) {
-        return pointHistoryTable.selectAllByUserId(id).stream()
-                .sorted(Comparator.comparingLong(PointHistory::id).reversed())
+    public List<PointLog> findPointLogDesc(Long id) {
+        return pointRepository.findPointLogsByUserId(id).stream()
+                .sorted(Comparator.comparingLong(PointLog::getId).reversed())
                 .toList();
     }
 
-    public UserPoint charge(Long id, Long amount) {
-        UserPoint userPoint = userPointTable.selectById(id);
-        if (!userPoint.enableChargeAmount(amount)) {
-            throw new CommonException(ErrorCode.POLICY_VIOLATION, "포인트 충전 금액");
-        }
-        UserPoint chargeUserPoint = userPoint.charge(amount, timeHolder);
-        userPointTable.insertOrUpdate(chargeUserPoint.id(), chargeUserPoint.point());
+    public Point charge(Long id, Long amount) {
+        Point point = pointRepository.findByUserId(id)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
 
-        saveLog(chargeUserPoint, TransactionType.CHARGE);
-        return chargeUserPoint;
+        chargingPolicy.validate(amount, point.getAmount());
+        Point chargePoint = point.charge(amount);
+        Point result = pointRepository.saveAndUpdate(chargePoint);
+
+        pointRepository.writeLog(result, TransactionType.CHARGE);
+        return result;
     }
 
-    public UserPoint use(Long id, Long amount) {
-        UserPoint userPoint = userPointTable.selectById(id);
-        if (!userPoint.enableUseAmount(amount)) {
-            throw new CommonException(ErrorCode.POLICY_VIOLATION, "포인트 사용 금액");
-        }
-        UserPoint usedUserPoint = userPoint.use(amount, timeHolder);
-        userPointTable.insertOrUpdate(usedUserPoint.id(), usedUserPoint.point());
+    public Point use(Long id, Long amount) {
+        Point point = pointRepository.findByUserId(id)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
+        usagePolicy.validate(amount, point.getAmount());
+        Point usedPoint = point.use(amount);
+        Point result = pointRepository.saveAndUpdate(usedPoint);
 
-        saveLog(usedUserPoint, TransactionType.USE);
-        return usedUserPoint;
+        pointRepository.writeLog(result, TransactionType.USE);
+        return result;
     }
 
-    private void saveLog(UserPoint userPoint, TransactionType type) {
-        pointHistoryTable.insert(userPoint.id(), userPoint.point(), type, userPoint.updateMillis());
-    }
 }

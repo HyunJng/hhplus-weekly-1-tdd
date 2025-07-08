@@ -1,11 +1,11 @@
 package io.hhplus.tdd.point.controller;
 
-import io.hhplus.tdd.point.domain.PointHistory;
-import io.hhplus.tdd.point.domain.UserPoint;
+import io.hhplus.tdd.point.controller.dto.PointDto;
+import io.hhplus.tdd.point.controller.dto.PointLogDto;
+import io.hhplus.tdd.point.domain.model.Point;
 import io.hhplus.tdd.point.service.PointService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,36 +15,41 @@ import java.util.List;
 @RequestMapping("/point")
 public class PointController {
 
-    private static final Logger log = LoggerFactory.getLogger(PointController.class);
     private final PointService pointService;
 
     @GetMapping("{id}")
-    public UserPoint point(
+    public ResponseEntity<PointDto.Response> point(
             @PathVariable long id
     ) {
-        return pointService.findUserPoint(id);
+        Point point = pointService.findPoint(id);
+        return ResponseEntity.ok(PointDto.Response.from(point));
     }
 
     @GetMapping("{id}/histories")
-    public List<PointHistory> history(
+    public ResponseEntity<List<PointLogDto.Response>> history(
             @PathVariable long id
     ) {
-        return pointService.findUserPointLog(id);
+        List<PointLogDto.Response> pointLogs = pointService.findPointLogDesc(id).stream()
+                .map(PointLogDto.Response::from)
+                .toList();
+        return ResponseEntity.ok(pointLogs);
     }
 
     @PatchMapping("{id}/charge")
-    public UserPoint charge(
+    public ResponseEntity<PointDto.Response> charge(
             @PathVariable long id,
-            @RequestBody long amount
+            @RequestBody PointDto.Request request
     ) {
-        return pointService.charge(id, amount);
+        Point charge = pointService.charge(id, request.getAmount());
+        return ResponseEntity.ok(PointDto.Response.from(charge));
     }
 
     @PatchMapping("{id}/use")
-    public UserPoint use(
+    public ResponseEntity<PointDto.Response> use(
             @PathVariable long id,
-            @RequestBody long amount
+            @RequestBody PointDto.Request request
     ) {
-        return pointService.use(id, amount);
+        Point use = pointService.use(id, request.getAmount());
+        return ResponseEntity.ok(PointDto.Response.from(use));
     }
 }

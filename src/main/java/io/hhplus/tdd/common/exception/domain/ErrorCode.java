@@ -4,7 +4,9 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
-    POLICY_VIOLATION(HttpStatus.BAD_REQUEST, "%1 정책 위반");
+    NOT_FOUND_RESOURCE(HttpStatus.BAD_REQUEST, "존재하지 않은 %1"),
+    POLICY_VIOLATION(HttpStatus.BAD_REQUEST, "정책 위반(%1)"),
+    SHORTAGE_RESOURCE(HttpStatus.BAD_REQUEST, "%1 부족");
 
     @Getter
     private final HttpStatus status;

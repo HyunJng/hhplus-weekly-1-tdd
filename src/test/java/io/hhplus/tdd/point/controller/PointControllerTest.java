@@ -22,6 +22,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * (공통 이유)
+ * 성공인 경우 사용자가 의도한 응답 요소와 값들을 전달받는지
+ * 오류인 경우 사용자가 의도한 상태코드와 메시지를 받는지 확인.
+ * 사용자가 응답을 어떻게 받는지는 중요한 테스트라고 생각하여
+ * 모든 메서드의 성공/실패의 경우를 확인하도록 의도
+ * */
 @SpringBootTest
 @AutoConfigureMockMvc
 class PointControllerTest {

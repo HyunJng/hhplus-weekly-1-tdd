@@ -15,7 +15,9 @@ import io.hhplus.tdd.point.service.port.PointRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+/**
+ * 도메인과 서비스가 참조하는 객체들이 의도한대로 협력하고 데이터를 처리하였는지 테스트
+ * mock을 이용하여 도메인 테스트와 불필요한 중복을 피하도록 의도
+ * */
 class PointServiceTest {
 
     private PointService pointService;
@@ -40,6 +46,9 @@ class PointServiceTest {
         pointService = new PointService(pointRepository, chargingPolicy, usagePolicy);
     }
 
+    /**
+     * repository와 협력하는지, 반환된 값을 응답하는지 테스트하고자 작성
+     * */
     @Test
     void 포인트를_조회할_수_있다() throws Exception {
         //given
@@ -50,18 +59,25 @@ class PointServiceTest {
         Point point = pointService.findPoint(logPoint.getUserId());
 
         //then
+        verify(pointRepository).findByUserId(1l);
         assertThat(point.getUserId()).isEqualTo(logPoint.getUserId());
         assertThat(point.getAmount()).isEqualTo(logPoint.getAmount());
     }
 
+    /**
+     * 해당 메서드에서 던지는 Exception 이 제대로 반환되었는지 확인하고자 작성
+     * */
     @Test
     void 포인트_정보가_존재하지_않는다면_오류를_발생시킨다() throws Exception {
         //given & when & then
         Assertions.assertThatThrownBy(() -> pointService.findPoint(1000L))
                 .isInstanceOf(CommonException.class)
-                .hasMessage(ErrorCode.NOT_FOUND_RESOURCE.getMessage("point"));
+                .hasMessage(ErrorCode.NOT_FOUND_RESOURCE.getMessage("user"));
     }
 
+    /**
+     * repository와 협력하는지, 반환된 값을 적절히 정렬하였는지 확인하고자 작성
+     * */
     @Test
     void 포인트_이용_내역을_최신순으로_조회할_수_있다() throws Exception {
         //given
@@ -91,6 +107,9 @@ class PointServiceTest {
         assertThat(pointLogs.get(2).getType()).isEqualTo(pointLog1.getType());
     }
 
+    /**
+     * repository와 올바른 순서로 협력하는지 확인하고자 작성
+     * */
     @Test
     void 충전_요청시_포인트가_저장되고_이력이_기록된다() throws Exception {
         //given
@@ -125,6 +144,9 @@ class PointServiceTest {
         assertThat(typeCaptor.getValue()).isEqualTo(TransactionType.CHARGE);
     }
 
+    /**
+     * repository와 올바른 순서로 협력하는지 확인하고자 작성
+     * */
     @Test
     void 사용_요청시_포인트가_차감되고_이력이_기록된다() throws Exception {
         //given

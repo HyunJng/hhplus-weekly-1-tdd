@@ -1,4 +1,4 @@
-package io.hhplus.tdd.point.domain;
+package io.hhplus.tdd.point.domain.model;
 
 
 /**

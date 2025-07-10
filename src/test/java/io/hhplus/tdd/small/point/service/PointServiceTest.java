@@ -1,4 +1,4 @@
-package io.hhplus.tdd.point.service;
+package io.hhplus.tdd.small.point.service;
 
 import io.hhplus.tdd.common.exception.domain.CommonException;
 import io.hhplus.tdd.common.exception.domain.ErrorCode;
@@ -11,6 +11,7 @@ import io.hhplus.tdd.point.domain.policy.ChargingPolicy;
 import io.hhplus.tdd.point.domain.policy.DefaultChargingPolicy;
 import io.hhplus.tdd.point.domain.policy.DefaultUsagePolicy;
 import io.hhplus.tdd.point.domain.policy.UsagePolicy;
+import io.hhplus.tdd.point.service.PointService;
 import io.hhplus.tdd.point.service.port.PointRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

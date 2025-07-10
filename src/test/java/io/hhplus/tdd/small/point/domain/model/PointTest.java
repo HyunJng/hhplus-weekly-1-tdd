@@ -1,5 +1,6 @@
-package io.hhplus.tdd.point.domain.model;
+package io.hhplus.tdd.small.point.domain.model;
 
+import io.hhplus.tdd.point.domain.model.Point;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 

@@ -3,7 +3,9 @@ package io.hhplus.tdd.point.controller;
 import io.hhplus.tdd.point.controller.dto.PointDto;
 import io.hhplus.tdd.point.controller.dto.PointLogDto;
 import io.hhplus.tdd.point.domain.model.Point;
-import io.hhplus.tdd.point.service.PointService;
+import io.hhplus.tdd.point.usecase.PointChargingService;
+import io.hhplus.tdd.point.usecase.PointUsageService;
+import io.hhplus.tdd.point.usecase.PointViewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +17,15 @@ import java.util.List;
 @RequestMapping("/point")
 public class PointController {
 
-    private final PointService pointService;
+    private final PointChargingService pointChargingService;
+    private final PointUsageService pointUsageService;
+    private final PointViewService pointViewService;
 
     @GetMapping("{id}")
     public ResponseEntity<PointDto.Response> point(
             @PathVariable long id
     ) {
-        Point point = pointService.findPoint(id);
+        Point point = pointViewService.findPoint(id);
         return ResponseEntity.ok(PointDto.Response.from(point));
     }
 
@@ -29,7 +33,7 @@ public class PointController {
     public ResponseEntity<List<PointLogDto.Response>> history(
             @PathVariable long id
     ) {
-        List<PointLogDto.Response> pointLogs = pointService.findPointLogDesc(id).stream()
+        List<PointLogDto.Response> pointLogs = pointViewService.findPointLogDesc(id).stream()
                 .map(PointLogDto.Response::from)
                 .toList();
         return ResponseEntity.ok(pointLogs);
@@ -40,7 +44,7 @@ public class PointController {
             @PathVariable long id,
             @RequestBody PointDto.Request request
     ) {
-        Point charge = pointService.charge(id, request.getAmount());
+        Point charge = pointChargingService.charge(id, request.getAmount());
         return ResponseEntity.ok(PointDto.Response.from(charge));
     }
 
@@ -49,7 +53,7 @@ public class PointController {
             @PathVariable long id,
             @RequestBody PointDto.Request request
     ) {
-        Point use = pointService.use(id, request.getAmount());
+        Point use = pointUsageService.use(id, request.getAmount());
         return ResponseEntity.ok(PointDto.Response.from(use));
     }
 }

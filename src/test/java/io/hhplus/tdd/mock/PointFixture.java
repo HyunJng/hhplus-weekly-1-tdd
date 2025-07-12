@@ -12,4 +12,13 @@ public class PointFixture {
                 .build();
 
     }
+
+    public static Point createPoint(long amount) {
+        return Point.builder()
+                .userId(1L)
+                .amount(amount)
+                .updateMillis(System.currentTimeMillis())
+                .build();
+
+    }
 }

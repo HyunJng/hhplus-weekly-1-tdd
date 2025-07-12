@@ -1,8 +1,11 @@
 package io.hhplus.tdd.small.point.domain.model;
 
 import io.hhplus.tdd.point.domain.model.Point;
+import io.hhplus.tdd.point.domain.policy.ChargingPolicy;
+import io.hhplus.tdd.point.domain.policy.UsagePolicy;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,8 +24,10 @@ class PointTest {
         //given
         Point currentPoint = new Point(1L, 0L, 1234L);
 
+        ChargingPolicy chargingPolicy = Mockito.mock(ChargingPolicy.class);
+
         //when
-        Point chargePoint = currentPoint.charge(chargeAmount);
+        Point chargePoint = currentPoint.charge(chargeAmount, chargingPolicy);
 
         //then
         assertThat(chargePoint.getUserId()).isEqualTo(1L);
@@ -38,8 +43,10 @@ class PointTest {
         //given
         Point currentPoint = new Point(1L, 100_000L, 1234L);
 
+        UsagePolicy usagePolicy = Mockito.mock(UsagePolicy.class);
+
         //when
-        Point usagePoint = currentPoint.use(usageAmount);
+        Point usagePoint = currentPoint.use(usageAmount, usagePolicy);
 
         //then
         assertThat(usagePoint.getUserId()).isEqualTo(1L);

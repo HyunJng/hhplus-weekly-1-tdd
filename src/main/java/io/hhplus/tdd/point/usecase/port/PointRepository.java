@@ -1,4 +1,4 @@
-package io.hhplus.tdd.point.service.port;
+package io.hhplus.tdd.point.usecase.port;
 
 import io.hhplus.tdd.point.domain.model.Point;
 import io.hhplus.tdd.point.domain.model.PointLog;

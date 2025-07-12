@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
-public class PointLogEventTest {
+public class PointLogEventIntegrationTest {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;

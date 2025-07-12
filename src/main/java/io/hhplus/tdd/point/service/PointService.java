@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @RequiredArgsConstructor
 @Service
@@ -21,6 +23,8 @@ public class PointService {
     private final PointRepository pointRepository;
     private final ChargingPolicy chargingPolicy;
     private final UsagePolicy usagePolicy;
+
+    Lock lock = new ReentrantLock();
 
     public Point findPoint(Long id) {
         return pointRepository.findByUserId(id)
@@ -34,26 +38,36 @@ public class PointService {
     }
 
     public Point charge(Long id, Long amount) {
-        Point point = pointRepository.findByUserId(id)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
+        lock.lock();
+        try {
+            Point point = pointRepository.findByUserId(id)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
 
-        chargingPolicy.validate(amount, point.getAmount());
-        Point chargePoint = point.charge(amount);
-        Point result = pointRepository.saveAndUpdate(chargePoint);
+            chargingPolicy.validate(amount, point.getAmount());
+            Point chargePoint = point.charge(amount);
+            Point result = pointRepository.saveAndUpdate(chargePoint);
 
-        pointRepository.writeLog(result, TransactionType.CHARGE);
-        return result;
+            pointRepository.writeLog(result, TransactionType.CHARGE);
+            return result;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Point use(Long id, Long amount) {
-        Point point = pointRepository.findByUserId(id)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
-        usagePolicy.validate(amount, point.getAmount());
-        Point usedPoint = point.use(amount);
-        Point result = pointRepository.saveAndUpdate(usedPoint);
+        lock.lock();
+        try {
+            Point point = pointRepository.findByUserId(id)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
+            usagePolicy.validate(amount, point.getAmount());
+            Point usedPoint = point.use(amount);
+            Point result = pointRepository.saveAndUpdate(usedPoint);
 
-        pointRepository.writeLog(result, TransactionType.USE);
-        return result;
+            pointRepository.writeLog(result, TransactionType.USE);
+            return result;
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

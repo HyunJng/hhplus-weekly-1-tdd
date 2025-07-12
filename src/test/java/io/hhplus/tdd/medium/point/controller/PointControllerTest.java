@@ -1,4 +1,4 @@
-package io.hhplus.tdd.point.controller;
+package io.hhplus.tdd.medium.point.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;

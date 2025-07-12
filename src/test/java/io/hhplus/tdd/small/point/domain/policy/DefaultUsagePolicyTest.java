@@ -1,6 +1,8 @@
-package io.hhplus.tdd.point.domain.policy;
+package io.hhplus.tdd.small.point.domain.policy;
 
 import io.hhplus.tdd.common.exception.domain.CommonException;
+import io.hhplus.tdd.point.domain.policy.DefaultUsagePolicy;
+import io.hhplus.tdd.point.domain.policy.UsagePolicy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

@@ -1,7 +1,7 @@
 package io.hhplus.tdd.small.point.usecase;
 
+import io.hhplus.tdd.point.domain.event.PointLogEvent;
 import io.hhplus.tdd.point.domain.model.Point;
-import io.hhplus.tdd.point.domain.model.TransactionType;
 import io.hhplus.tdd.point.domain.policy.UsagePolicy;
 import io.hhplus.tdd.point.usecase.PointUsageService;
 import io.hhplus.tdd.point.usecase.port.PointRepository;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
@@ -28,19 +29,20 @@ class PointUsageServiceTest {
     private PointRepository pointRepository;
     @Mock
     private UsagePolicy usagePolicy;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @BeforeEach
     void init() {
         MockitoAnnotations.openMocks(this);
-        pointUsageService = new PointUsageService(pointRepository, usagePolicy);
+        pointUsageService = new PointUsageService(pointRepository, usagePolicy, eventPublisher);
     }
-
 
     /**
      * repository와 올바른 순서로 협력하는지 확인하고자 작성
      * */
     @Test
-    void 사용_요청시_포인트가_차감되고_이력이_기록된다() throws Exception {
+    void 사용_요청시_포인트가_차감되고_로그_이벤트를_발행한다() throws Exception {
         //given
         long currentAmount = 10000L;
         long usageAmount = 5000L;
@@ -66,11 +68,8 @@ class PointUsageServiceTest {
         assertThat(savePoint.getUserId()).isEqualTo(1L);
         assertThat(savePoint.getAmount()).isEqualTo(5000L);
 
-        ArgumentCaptor<Point> logCaptor = ArgumentCaptor.forClass(Point.class);
-        ArgumentCaptor<TransactionType> typeCaptor = ArgumentCaptor.forClass(TransactionType.class);
-        verify(pointRepository).writeLog(logCaptor.capture(), typeCaptor.capture());
-        Point logPoint = logCaptor.getValue();
-        assertThat(logPoint).isEqualTo(expectResult);
-        assertThat(typeCaptor.getValue()).isEqualTo(TransactionType.USE);
+        ArgumentCaptor<PointLogEvent> pointLogEventCaptor = ArgumentCaptor.forClass(PointLogEvent.class);
+        verify(eventPublisher).publishEvent(pointLogEventCaptor.capture());
+
     }
 }

@@ -1,6 +1,8 @@
 package io.hhplus.tdd.point.domain.model;
 
 
+import io.hhplus.tdd.point.domain.policy.ChargingPolicy;
+import io.hhplus.tdd.point.domain.policy.UsagePolicy;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,7 +20,8 @@ public class Point {
         this.updateMillis = updateMillis;
     }
 
-    public Point charge(long amount) {
+    public Point charge(long amount, ChargingPolicy chargingPolicy) {
+        chargingPolicy.validate(amount, this.amount);
         long updatePoint = this.amount + amount;
         return Point.builder()
                 .userId(this.userId)
@@ -26,7 +29,8 @@ public class Point {
                 .build();
     }
 
-    public Point use(long amount) {
+    public Point use(long amount, UsagePolicy usagePolicy) {
+        usagePolicy.validate(amount, this.amount);
         long updatePoint = this.amount - amount;
         return Point.builder()
                 .userId(this.getUserId())

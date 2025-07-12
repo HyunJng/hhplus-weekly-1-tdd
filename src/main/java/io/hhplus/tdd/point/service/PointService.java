@@ -43,8 +43,7 @@ public class PointService {
             Point point = pointRepository.findByUserId(id)
                     .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
 
-            chargingPolicy.validate(amount, point.getAmount());
-            Point chargePoint = point.charge(amount);
+            Point chargePoint = point.charge(amount, chargingPolicy);
             Point result = pointRepository.saveAndUpdate(chargePoint);
 
             pointRepository.writeLog(result, TransactionType.CHARGE);
@@ -59,8 +58,7 @@ public class PointService {
         try {
             Point point = pointRepository.findByUserId(id)
                     .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE, "user"));
-            usagePolicy.validate(amount, point.getAmount());
-            Point usedPoint = point.use(amount);
+            Point usedPoint = point.use(amount, usagePolicy);
             Point result = pointRepository.saveAndUpdate(usedPoint);
 
             pointRepository.writeLog(result, TransactionType.USE);

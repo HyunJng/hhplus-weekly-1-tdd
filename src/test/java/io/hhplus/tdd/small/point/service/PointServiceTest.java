@@ -8,8 +8,6 @@ import io.hhplus.tdd.point.domain.model.Point;
 import io.hhplus.tdd.point.domain.model.PointLog;
 import io.hhplus.tdd.point.domain.model.TransactionType;
 import io.hhplus.tdd.point.domain.policy.ChargingPolicy;
-import io.hhplus.tdd.point.domain.policy.DefaultChargingPolicy;
-import io.hhplus.tdd.point.domain.policy.DefaultUsagePolicy;
 import io.hhplus.tdd.point.domain.policy.UsagePolicy;
 import io.hhplus.tdd.point.service.PointService;
 import io.hhplus.tdd.point.service.port.PointRepository;
@@ -36,14 +34,14 @@ class PointServiceTest {
 
     @Mock
     private PointRepository pointRepository;
-
-    ChargingPolicy chargingPolicy = new DefaultChargingPolicy();
-    UsagePolicy usagePolicy = new DefaultUsagePolicy();
+    @Mock
+    private ChargingPolicy chargingPolicy;
+    @Mock
+    private UsagePolicy usagePolicy;
 
     @BeforeEach
     void init() {
         MockitoAnnotations.openMocks(this);
-
         pointService = new PointService(pointRepository, chargingPolicy, usagePolicy);
     }
 
@@ -123,7 +121,7 @@ class PointServiceTest {
 
         when(pointRepository.findByUserId(1L)).thenReturn(Optional.of(currentPoint));
         when(currentPoint.getAmount()).thenReturn(currentAmount);
-        when(currentPoint.charge(chargeAmount)).thenReturn(chargePoint);
+        when(currentPoint.charge(chargeAmount, chargingPolicy)).thenReturn(chargePoint);
         when(pointRepository.saveAndUpdate(chargePoint)).thenReturn(expectResult);
         //when
         Point result = pointService.charge(1L, chargeAmount);
@@ -160,7 +158,7 @@ class PointServiceTest {
 
         when(pointRepository.findByUserId(1L)).thenReturn(Optional.of(currentPoint));
         when(currentPoint.getAmount()).thenReturn(currentAmount);
-        when(currentPoint.use(usageAmount)).thenReturn(usagePoint);
+        when(currentPoint.use(usageAmount, usagePolicy)).thenReturn(usagePoint);
         when(pointRepository.saveAndUpdate(usagePoint)).thenReturn(expectResult);
 
         //when

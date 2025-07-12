@@ -6,7 +6,7 @@ import io.hhplus.tdd.point.domain.model.TransactionType;
 import io.hhplus.tdd.point.infrastruction.database.PointHistoryTable;
 import io.hhplus.tdd.point.infrastruction.database.UserPointTable;
 import io.hhplus.tdd.point.infrastruction.database.entity.PointHistory;
-import io.hhplus.tdd.point.service.port.PointRepository;
+import io.hhplus.tdd.point.usecase.port.PointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
